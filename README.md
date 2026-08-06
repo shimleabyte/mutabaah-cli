@@ -1,8 +1,8 @@
-#mutabaah-cli
+# mutabaah-cli
 
-###This is my first 'learning by doing' mini Go project. 
+### This is my first 'learning by doing' mini Go project. 
 
-###Project structure:
+### Project structure:
 mutabaah-cli/
 ├── main.go
 ├── activity.go
@@ -13,7 +13,7 @@ mutabaah-cli/
 This is mutabaah-cli, daily prayer/habit tracker command line interface built in go language.
 "Mutabaah" is just different terminology of habit tracker specialized in islamic prayers, so it's more like daily prayer tracker, often used by islamic education culture in indonesia.
 
-###Project purposes -> Implement how go declaration works:
+### Project purposes -> Implement how go declaration works:
 variable declaration
 type declaration
 array/slice
@@ -22,7 +22,7 @@ function type
 function variable
 closure 
 
-###Feature:
+### Feature:
 Saving Activities
 Adding
 Summarize Total Activities
