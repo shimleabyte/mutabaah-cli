@@ -1,21 +1,17 @@
-package main 
+package main
 
 import "fmt"
 
 // Tanggung jawab main.go saat ini adalah membuat Activity
 
 func main() {
-	var act1 := Activity{
-	Name: "Tadarus",
-	Target: 5,
-	Progress: 3,
+	activities := []Activity{
+		{Name: "Shalat", Target: 5, Progress: 3},
+		{Name: "Puasa", Target: 30, Progress: 15},
+		{Name: "Sedekah", Target: 10, Progress: 7},
 	}
-	var act2 := Activity{
-	Name: "Tasbih",
-	Target: 4,
-	Progress: 4,
+
+	for _, activity := range activities {
+		fmt.Println(ActivitySummary(activity))
 	}
 }
-
-
-
