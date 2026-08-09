@@ -1,272 +1,91 @@
 # mutabaah-cli
 
-### This is my first 'learning by doing' mini Go project. 
+A small CLI project built while learning Go through implementation.
 
-### Project structure:
-mutabaah-cli/
-├── main.go
-├── activity.go
-├── stats.go
-├── tracker.go
-└── types.go 
+Project ini berfungsi sebagai **learning laboratory**: setiap konsep Go yang dipelajari langsung diterapkan ke satu project yang terus berkembang, bukan dipisahkan menjadi contoh-contoh syntax yang berdiri sendiri.
 
-This is mutabaah-cli, daily prayer/habit tracker command line interface built in go language.
-"Mutabaah" is just different terminology of habit tracker specialized in islamic prayers, so it's more like daily prayer tracker, often used by islamic education culture in indonesia.
+The project itself is intentionally simple. Fokus utamanya adalah **learning Go through building**, bukan membuat production-ready habit tracker.
 
-### Project purposes -> Implement how go declaration works:
-variable declaration
-type declaration
-array/slice
-pointer
-function type
-function variable
-closure 
+## Learning Goals
 
-### Feature:
-Saving Activities
-Adding
-Summarize Total Activities
-Using Function as Data/State
+Konsep Go yang akan dipelajari dan diimplementasikan secara bertahap:
 
-Current commit status as journal:
-# Go Learning Project — Declaration Syntax
+* Declarations & types
+* Structs
+* Functions
+* Slices
+* Methods & receivers
+* Pointers
+* Function types
+* Function variables
+* Closures
+* Interfaces
+* Error handling
+* Testing
+* Packages & modularization
 
-## Tujuan
+## Project Direction
 
-Project ini dibuat sebagai media belajar Go secara bertahap. Setiap materi Go langsung diterapkan ke dalam project kecil, sehingga setiap konsep memiliki alasan keberadaan dan tidak hanya dipelajari melalui contoh yang terpisah.
+Mutabaah CLI dimulai sebagai tracker sederhana untuk merepresentasikan aktivitas dengan target dan progress.
 
-Project yang dibangun adalah **Mutaba'ah CLI Tracker**, namun domain dibuat sesederhana mungkin agar fokus utama tetap pada konsep bahasa Go.
-
----
-
-# Materi 1 — Declaration Syntax
-
-Materi ini mengacu pada artikel Rob Pike **"Go's Declaration Syntax"**.
-
-## Filosofi Go
-
-Go menggunakan pendekatan deklarasi yang dibaca **dari kiri ke kanan**, mengikuti cara manusia membaca.
-
-Contoh:
-
-```go
-var age int
-```
-
-Dibaca sebagai:
-
-> Variabel `age` bertipe `int`.
-
-Begitu juga untuk fungsi:
-
-```go
-func Add(a int, b int) int
-```
-
-Dibaca sebagai:
-
-> Function `Add` menerima dua `int` dan mengembalikan sebuah `int`.
-
-Berbeda dengan C yang mendeskripsikan tipe melalui bentuk ekspresi, Go memisahkan sintaks tipe dan sintaks ekspresi sehingga deklarasi menjadi lebih mudah dibaca ketika tipe mulai kompleks.
-
----
-
-# Penerapan ke Project
-
-## 1. Struct Declaration
-
-Membuat model data pertama.
-
-```go
-type Activity struct {
-    Name     string
-    Target   int
-    Progress int
-}
-```
-
-Objek ini merepresentasikan sebuah aktivitas yang memiliki:
-
-* Nama aktivitas
-* Target
-* Progress saat ini
-
----
-
-## 2. Struct Initialization
-
-Membuat instance pertama.
-
-```go
-var act1 Activity = Activity{
-    Name:     "Tadarus",
-    Target:   5,
-    Progress: 3,
-}
-```
-
-Pemahaman penting:
-
-* `Activity` adalah **type (blueprint)**.
-* `act1` adalah **instance (object/value)**.
-
----
-
-## 3. Printing Struct
-
-Menggunakan package `fmt`.
-
-```go
-fmt.Printf("%+v\n", act1)
-```
-
-Output:
+Current model:
 
 ```text
-{Name:Tadarus Target:5 Progress:3}
+Activity
+├── Name
+├── Target
+└── Progress
 ```
 
-Formatter yang dipelajari:
+The project will evolve as new Go concepts are introduced.
 
-* `%v` → hanya nilai.
-* `%+v` → nama field + nilai.
-* `%#v` → representasi lengkap dalam sintaks Go.
+## Current Capabilities
 
----
+* Create `Activity` values
+* Calculate completion percentage
+* Generate activity summaries
+* Store multiple activities in a slice
+* Iterate over activities
+* Compose functions
 
-## 4. Function Declaration
-
-Membuat fungsi yang menerima sebuah `Activity`.
-
-Contoh konsep:
+Example:
 
 ```text
-CompletionPercentage(activity Activity) int
+Tadarus: 3/5 (60%)
+Puasa: 15/30 (50%)
+Sedekah: 7/10 (70%)
 ```
 
-Dibaca sebagai:
+## Learning Journal
 
-> Function menerima sebuah `Activity` dan mengembalikan sebuah `int`.
+| Stage | Topic                     | Status  |
+| ----- | ------------------------- | ------- |
+| 01    | Go Declaration Syntax     | Done    |
+| 02    | Structs & Struct Values   | Done    |
+| 03    | Functions & Return Values | Done    |
+| 04    | Function Composition      | Done    |
+| 05    | Slices & Iteration        | Done    |
+| 06    | Methods & Receivers       | Next    |
+| 07    | Pointers                  | Planned |
+| 08    | Function Types & Closures | Planned |
+| 09    | Interfaces                | Planned |
+| 10    | Error Handling            | Planned |
+| 11    | Testing                   | Planned |
+| 12    | Packages & Modularization | Planned |
 
----
+Each stage is learned by implementing it directly into the project.
 
-## 5. Accessing Struct Fields
+## Learning Notes
 
-Field diakses melalui **instance**, bukan melalui **type**.
+Detailed explanations, mistakes, mental models, and experiments are kept separately from this README.
 
-Benar:
+The README is intentionally kept short so it remains useful as a project index rather than becoming a textbook.
 
-```go
-activity.Progress
-activity.Target
-```
+## Reference
 
-Salah:
+Primary reference for the first stage:
 
-```go
-Activity.Progress
-```
+**Rob Pike — Go's Declaration Syntax (2010)**
+**ChatGPT**, **Notebooklm**, as a project coach
 
-Karena `Activity` adalah nama tipe, bukan objek yang menyimpan data.
-
----
-
-## 6. Return Value
-
-Menghitung persentase progress.
-
-Contoh logika:
-
-```text
-percentage = (Progress × 100) / Target
-```
-
-Nilai tersebut kemudian dikembalikan menggunakan `return`.
-
----
-
-## 7. Runtime Error: Division by Zero
-
-Operasi pembagian integer dengan penyebut nol akan menyebabkan panic.
-
-Contoh:
-
-```go
-5 / 0
-0 / 0
-```
-
-Menghasilkan runtime error:
-
-```text
-panic: runtime error: integer divide by zero
-```
-
-Solusinya adalah melakukan validasi sebelum pembagian.
-
-Contoh aturan bisnis sederhana:
-
-* Jika `Target == 0`, kembalikan `0`.
-
-Perlu dibedakan antara:
-
-* **Matematika** → pembagian dengan nol tidak terdefinisi.
-* **Program** → operasi tersebut menyebabkan runtime error sehingga harus ditangani oleh programmer.
-
----
-
-# Konsep yang Dipelajari
-
-* Package
-* Struct
-* Exported field
-* Variable declaration
-* Struct literal
-* Function declaration
-* Function parameter
-* Return value
-* Field access
-* Integer arithmetic
-* Basic validation
-* fmt.Printf formatting
-
----
-
-# Struktur Project Saat Ini
-
-```text
-mutabaah-cli/
-
-├── main.go
-├── types.go
-├── tracker.go
-└── stats.go
-```
-
----
-
-# Selanjutnya
-
-Materi berikutnya:
-
-* Method
-* Receiver
-* Memindahkan perilaku dari fungsi menjadi method milik `Activity`
-
-Transformasi yang akan dilakukan:
-
-```text
-Sebelum
-
-CompletionPercentage(activity)
-
-↓
-
-Sesudah
-
-activity.CompletionPercentage()
-```
-
-Ini merupakan langkah awal menuju pemrograman yang lebih berorientasi objek dengan pendekatan idiomatis Go.
-
-
+The goal is not merely to reproduce the examples from the reference, but to understand the reasoning behind Go's syntax and apply it through implementation.
