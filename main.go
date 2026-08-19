@@ -12,6 +12,6 @@ func main() {
 	}
 
 	for _, activity := range activities {
-		fmt.Println(ActivitySummary(activity))
+		fmt.Println(activity.ActivitySummary())
 	}
 }
