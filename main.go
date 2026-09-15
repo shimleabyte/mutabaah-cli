@@ -16,6 +16,9 @@ func main() {
 		DibuatSaat: time.Now(),
 	}
 
-	fmt.Printf("Aktivitas \n %s ditambahkan dengan target %d/%d \n Dibuat %s", aktivitas.Judul, aktivitas.Target.Sesi, aktivitas.Target.Periode, aktivitas.DibuatSaat)
+	fmt.Printf(`Update Berhasil! Aktivitas ditambahkan dengan keterangan:
+	Judul: %s
+	Target(Sesi/Periode): %d/%d
+	Direncanakan pada: %s`, aktivitas.Judul, aktivitas.Target.Sesi, aktivitas.Target.Periode, aktivitas.DibuatSaat)
 
 }
