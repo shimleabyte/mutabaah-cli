@@ -23,16 +23,19 @@ type ListMutabaah struct {
 }
 
 func (lm *ListMutabaah) Tambah(judul string) Aktivitas {
+
 	idBaru := 1
-	if len(lm, DaftarAktivitas) > 0 {
-		idBaru = lm.DaftarAktivitas[len(lm, DaftarAktivitas)-1].ID + 1
+	target := UkurTarget{3, 7}
+
+	if len(lm.DaftarAktivitas) > 0 {
+		idBaru = lm.DaftarAktivitas[len(lm.DaftarAktivitas)-1].ID + 1
 	}
 
 	aktivitas := Aktivitas{
 		ID:         idBaru,
 		Judul:      judul,
 		Target:     target,
-		Progress:   proses,
+		Progress:   0,
 		IsDone:     false,
 		DibuatSaat: time.Now(),
 	}
