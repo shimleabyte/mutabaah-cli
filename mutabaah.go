@@ -56,3 +56,13 @@ func (lm *ListMutabaah) Sudah(id int) error {
 	}
 	return fmt.Errorf("Lupakah dengan agenda anda? \n id %d tidak ada dalam list mutabaah yang sudah anda buat", id)
 }
+
+func (lm *ListMutabaah) Hapus(id int) error {
+	for i, m := range lm.DaftarAktivitas {
+		if m.Id == id {
+			lm.DaftarAktivitas = append(lm.DaftarAktivitas[:i], lm.DaftarAktivitas[i+1:]...)
+			return nil
+		}
+	}
+	return fmt.Errorf("Aktivitas yang anda (id: %d) cari sudah dihapus atau memang tidak dibuat sebelumnya", id)
+}
