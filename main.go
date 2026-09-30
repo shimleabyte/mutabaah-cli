@@ -8,7 +8,7 @@ import (
 func main() {
 
 	aktivitas := Aktivitas{
-		ID:         1,
+		Id:         1,
 		Judul:      "Test",
 		Target:     UkurTarget{Sesi: 1, Periode: 2},
 		Progress:   0,
