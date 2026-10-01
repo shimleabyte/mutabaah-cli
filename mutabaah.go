@@ -66,3 +66,14 @@ func (lm *ListMutabaah) Hapus(id int) error {
 	}
 	return fmt.Errorf("Aktivitas yang anda (id: %d) cari sudah dihapus atau memang tidak dibuat sebelumnya", id)
 }
+
+func (lm *ListMutabaah) Ubah(id int, judulBaru string) error {
+	for i := range lm.DaftarAktivitas {
+		if lm.DaftarAktivitas[i].Id == id {
+			lm.DaftarAktivitas[i].Judul = judulBaru
+			return nil
+		}
+	}
+
+	return fmt.Errorf("Ngedit naon ai sia aweuh da id %d mah", id)
+}
