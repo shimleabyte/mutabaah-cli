@@ -1,0 +1,15 @@
+{
+  "daftarAktivitas": [
+    {
+      "id": 1,
+      "judul": "Main Biji",
+      "target": {
+        "Sesi": 3,
+        "Periode": 7
+      },
+      "proses": 0,
+      "ketuntasan": true,
+      "dibuatSaat": "2026-10-04T12:49:41.041318839+07:00"
+    }
+  ]
+}

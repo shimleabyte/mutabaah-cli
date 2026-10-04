@@ -63,6 +63,9 @@ func main() {
 		fmt.Printf("Aktivitas %d dihapus\n", id)
 
 	case "ubah":
+		changed = false
+		fmt.Println("Fitur ubah belum diimplementasikan.")
+
 	case "help":
 		changed = false
 		printHelp()
