@@ -19,7 +19,7 @@ bin/
 dist/
 
 # Dynamic data and runtime output
-daftarAktivitas.json
+daftaraktivitas.json
 
 # Project Workspace and Environment Files
 go.work
