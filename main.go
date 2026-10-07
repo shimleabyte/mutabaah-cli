@@ -63,8 +63,20 @@ func main() {
 		fmt.Printf("Aktivitas %d dihapus\n", id)
 
 	case "ubah":
-		changed = false
-		fmt.Println("Fitur ubah belum diimplementasikan.")
+		if len(os.Args) < 4 {
+			fmt.Println("Penggunaan: mutabaah-cli ubah <id> \"Judul Baru\"")
+			os.Exit(1)
+		}
+
+		id := parseID(os.Args, "ubah")
+		judulBaru := strings.Join(os.Args[3:], " ")
+
+		if err := list.Ubah(id, judulBaru); err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("Aktivitas %d berhasil diubah menjadi \"%s\"\n", id, judulBaru)
 
 	case "help":
 		changed = false
@@ -101,6 +113,10 @@ func parseID(args []string, cmd string) int {
 func printHelp() {
 	fmt.Println(`mutabaah-cli tracker ibadah sederhana
 	Penggunaan:
-	mutabaah-cli tambah "judul aktivitas" Tambah aktivitas baru ke list mutabaah
+  mutabaah-cli tambah "judul aktivitas"    Tambah aktivitas baru
+  mutabaah-cli list                        Tampilkan semua aktivitas
+  mutabaah-cli sudah <id>                  Tandai aktivitas selesai
+  mutabaah-cli hapus <id>                  Hapus aktivitas
+  mutabaah-cli ubah <id> "judul baru"      Ubah judul aktivitas
 	`)
 }
