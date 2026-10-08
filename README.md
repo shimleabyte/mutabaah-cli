@@ -1,91 +1,119 @@
 # mutabaah-cli
 
-A small CLI project built while learning Go through implementation.
+Tracker ibadah/aktivitas harian sederhana berbasis command line, ditulis dengan Go (standard library saja, tanpa dependency eksternal). Data disimpan lokal dalam file JSON.
 
-Project ini berfungsi sebagai **learning laboratory**: setiap konsep Go yang dipelajari langsung diterapkan ke satu project yang terus berkembang, bukan dipisahkan menjadi contoh-contoh syntax yang berdiri sendiri.
+*Mutabaah* (muhasabah/mutaba'ah) = mencatat dan mengevaluasi amalan harian. Project ini dibuat sebagai latihan belajar Go: struct, pointer receiver, slice, JSON persistence, dan CLI routing via `os.Args`.
 
-The project itself is intentionally simple. Fokus utamanya adalah **learning Go through building**, bukan membuat production-ready habit tracker.
+## Fitur
 
-## Learning Goals
+- Tambah aktivitas baru
+- Lihat semua aktivitas beserta statusnya
+- Tandai aktivitas sudah dilaksanakan
+- Ubah judul aktivitas
+- Hapus aktivitas
+- Data tersimpan otomatis ke file JSON (human-readable)
 
-Konsep Go yang akan dipelajari dan diimplementasikan secara bertahap:
+## Prasyarat
 
-* Declarations & types
-* Structs
-* Functions
-* Slices
-* Methods & receivers
-* Pointers
-* Function types
-* Function variables
-* Closures
-* Interfaces
-* Error handling
-* Testing
-* Packages & modularization
+- [Go](https://go.dev/dl/) 1.21+ (disarankan versi terbaru)
 
-## Project Direction
+## Instalasi
 
-Mutabaah CLI dimulai sebagai tracker sederhana untuk merepresentasikan aktivitas dengan target dan progress.
-
-Current model:
-
-```text
-Activity
-├── Name
-├── Target
-└── Progress
+```bash
+git clone https://github.com/<username>/mutabaah-cli.git
+cd mutabaah-cli
+go build -o mutabaah-cli .
 ```
 
-The project will evolve as new Go concepts are introduced.
+Atau langsung jalankan tanpa build:
 
-## Current Capabilities
-
-* Create `Activity` values
-* Calculate completion percentage
-* Generate activity summaries
-* Store multiple activities in a slice
-* Iterate over activities
-* Compose functions
-
-Example:
-
-```text
-Tadarus: 3/5 (60%)
-Puasa: 15/30 (50%)
-Sedekah: 7/10 (70%)
+```bash
+go run . list
 ```
 
-## Learning Journal
+## Cara Pakai
 
-| Stage | Topic                     | Status  |
-| ----- | ------------------------- | ------- |
-| 01    | Go Declaration Syntax     | Done    |
-| 02    | Structs & Struct Values   | Done    |
-| 03    | Functions & Return Values | Done    |
-| 04    | Function Composition      | Done    |
-| 05    | Slices & Iteration        | Done    |
-| 06    | Methods & Receivers       | Next    |
-| 07    | Pointers                  | Planned |
-| 08    | Function Types & Closures | Planned |
-| 09    | Interfaces                | Planned |
-| 10    | Error Handling            | Planned |
-| 11    | Testing                   | Planned |
-| 12    | Packages & Modularization | Planned |
+```text
+mutabaah-cli tambah "judul aktivitas"    Tambah aktivitas baru
+mutabaah-cli list                        Tampilkan semua aktivitas
+mutabaah-cli sudah <id>                  Tandai aktivitas selesai
+mutabaah-cli ubah <id> "judul baru"      Ubah judul aktivitas
+mutabaah-cli hapus <id>                  Hapus aktivitas
+mutabaah-cli help                        Tampilkan bantuan
+```
 
-Each stage is learned by implementing it directly into the project.
+### Contoh
 
-## Learning Notes
+```bash
+$ ./mutabaah-cli tambah "Tilawah satu juz"
+Aktivitas "Tilawah satu juz" berhasil ditambahkan dengan ID 1
 
-Detailed explanations, mistakes, mental models, and experiments are kept separately from this README.
+$ ./mutabaah-cli tambah "Sholat dhuha"
+Aktivitas "Sholat dhuha" berhasil ditambahkan dengan ID 2
 
-The README is intentionally kept short so it remains useful as a project index rather than becoming a textbook.
+$ ./mutabaah-cli list
+|Ncan| 1. Tilawah satu juz
+|Ncan| 2. Sholat dhuha
 
-## Reference
+$ ./mutabaah-cli sudah 1
+Bagoes! Aktivitas 1 sudah ditandai terlaksana
 
-Primary reference for the first stage:
+$ ./mutabaah-cli list
+|Ntos| 1. Tilawah satu juz
+|Ncan| 2. Sholat dhuha
 
-**Rob Pike — Go's Declaration Syntax (2010)**
-**ChatGPT**, **Notebooklm**, as a project coach
+$ ./mutabaah-cli ubah 2 "Sholat dhuha 4 rakaat"
+Aktivitas 2 berhasil diubah menjadi "Sholat dhuha 4 rakaat"
 
-The goal is not merely to reproduce the examples from the reference, but to understand the reasoning behind Go's syntax and apply it through implementation.
+$ ./mutabaah-cli hapus 2
+Aktivitas 2 dihapus
+```
+
+### Arti status
+
+| Status   | Arti                      |
+|----------|---------------------------|
+| `\|Ncan\|` | Belum dilaksanakan (*can* = belum) |
+| `\|Ntos\|` | Sudah dilaksanakan (*ntos* = sudah) |
+
+## Penyimpanan Data
+
+Data disimpan di file `daftaraktivitas.json` pada **direktori tempat perintah dijalankan**. Kalau file belum ada, akan dibuat otomatis saat perintah pertama yang mengubah data dijalankan.
+
+Contoh isi file:
+
+```json
+{
+  "daftarAktivitas": [
+    {
+      "id": 1,
+      "judul": "Tilawah satu juz",
+      "target": { "Sesi": 3, "Periode": 7 },
+      "proses": 0,
+      "ketuntasan": true,
+      "dibuatSaat": "2026-10-08T07:30:00+09:00"
+    }
+  ]
+}
+```
+
+> Karena path-nya relatif, menjalankan CLI dari folder berbeda akan membaca/menulis file yang berbeda pula.
+
+## Struktur Project
+
+| File           | Isi                                                                 |
+|----------------|---------------------------------------------------------------------|
+| `main.go`      | Entry point, routing command via `os.Args`, parsing ID, teks bantuan |
+| `mutabaah.go`  | Struct `Aktivitas`, `UkurTarget`, `ListMutabaah` + method `Tambah`, `Sudah`, `Hapus`, `Ubah` |
+| `inventory.go` | Persistensi JSON: `LoadAktivitas` dan `SimpanAktivitas`             |
+
+## Catatan Desain
+
+- **Pointer receiver** pada `ListMutabaah` supaya method memodifikasi data asli, bukan salinan.
+- **ID auto-increment**: ID baru = ID aktivitas terakhir + 1, jadi ID yang sudah dihapus tidak dipakai ulang selama aktivitas terakhir masih ada.
+- **Hanya menyimpan jika ada perubahan**: command read-only seperti `list` dan `help` tidak menulis ulang file.
+- Field `target` (`Sesi`, `Periode`) dan `proses` sudah ada di struct dan JSON, tapi belum dipakai oleh command apa pun (disiapkan untuk pengembangan berikutnya).
+
+## Lisensi
+
+MIT License
