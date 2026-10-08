@@ -30,12 +30,12 @@ func main() {
 		}
 		judul := strings.Join(os.Args[2:], " ")
 		aktivitas := list.Tambah(judul)
-		fmt.Printf("Aktivitas %s dengan ID %d\n", aktivitas.Judul, aktivitas.Id)
+		fmt.Printf("Aktivitas %s dengan ID %d berhasil ditambahkan\n", aktivitas.Judul, aktivitas.Id)
 
 	case "list":
 		changed = false
 		if len(list.DaftarAktivitas) == 0 {
-			fmt.Println("Anda belum menambahkah agenda apapun, gunakan perintah: tambah \"judul aktivitas\"")
+			fmt.Println("Anda belum menambahkan agenda apapun, gunakan perintah: mutabaah-cli tambah \"judul aktivitas\"")
 			return
 		}
 		for _, a := range list.DaftarAktivitas {
@@ -52,7 +52,7 @@ func main() {
 			fmt.Println("Error", err)
 			os.Exit(1)
 		}
-		fmt.Printf("Bagoes! Aktivitas %d sudah ditandai terlaksana", id)
+		fmt.Printf("Bagoes! Aktivitas %d sudah ditandai terlaksana\n", id)
 
 	case "hapus":
 		id := parseID(os.Args, "hapus")
@@ -83,7 +83,7 @@ func main() {
 		printHelp()
 	default:
 		changed = false
-		fmt.Println("Command naon ai sia:", command)
+		fmt.Printf("Perintah %q tidak dikenal. Berikut daftar perintah yang tersedia:\n\n", command)
 		printHelp()
 		os.Exit(1)
 

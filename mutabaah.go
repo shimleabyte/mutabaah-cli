@@ -54,7 +54,7 @@ func (lm *ListMutabaah) Sudah(id int) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Lupakah dengan agenda anda? \n id %d tidak ada dalam list mutabaah yang sudah anda buat", id)
+	return fmt.Errorf("Lupakah dengan agenda anda? \n id %d tidak ada dalam list mutabaah yang sudah anda buat, cek dengan perintah 'list'", id)
 }
 
 func (lm *ListMutabaah) Hapus(id int) error {
@@ -64,7 +64,7 @@ func (lm *ListMutabaah) Hapus(id int) error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Aktivitas yang anda (id: %d) cari sudah dihapus atau memang tidak dibuat sebelumnya", id)
+	return fmt.Errorf("Aktivitas yang anda (id: %d) cari dengan perintah 'list' apakah sudah dihapus atau memang tidak dibuat sebelumnya", id)
 }
 
 func (lm *ListMutabaah) Ubah(id int, judulBaru string) error {
@@ -75,5 +75,5 @@ func (lm *ListMutabaah) Ubah(id int, judulBaru string) error {
 		}
 	}
 
-	return fmt.Errorf("Ngedit naon ai sia aweuh da id %d mah", id)
+	return fmt.Errorf("Aktivitas dengan ID %d tidak ditemukan, cek lagi daftarnya dengan perintah list", id)
 }
