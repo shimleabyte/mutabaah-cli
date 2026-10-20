@@ -34,16 +34,36 @@ func main() {
 
 	case "list":
 		changed = false
+		showAll := false
+
+		for _, arg := range os.Args[2:] {
+			if arg != "--all" {
+				fmt.Printf("flag yang anda ketik %q raib, coba flag ini: --all\n", arg)
+				os.Exit(1)
+			}
+			showAll = true
+		}
+
 		if len(list.DaftarAktivitas) == 0 {
 			fmt.Println("Anda belum menambahkan agenda apapun, gunakan perintah: mutabaah-cli tambah \"judul aktivitas\"")
 			return
 		}
+
+		shown := 0
+
 		for _, a := range list.DaftarAktivitas {
+			if a.IsDone && !showAll {
+				continue
+			}
 			status := "|Ncan|"
 			if a.IsDone {
 				status = "|Ntos|"
 			}
 			fmt.Printf("%s %d. %s\n", status, a.Id, a.Judul)
+			shown++
+		}
+		if shown == 0 {
+			fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list -all")
 		}
 
 	case "sudah":
