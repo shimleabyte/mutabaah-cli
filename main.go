@@ -13,7 +13,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	list, err := LoadAktivitas(dataFile)
+	path, err := DataPath()
+	if err != nil {
+		fmt.Println("Error:", err)
+		os.Exit(1)
+	}
+	if err := MigrateLegacy(path); err != nil {
+		fmt.Println("Gagal migrasi data lama:", err)
+		os.Exit(1)
+	}
+
+	list, err := LoadAktivitas(path)
 	if err != nil {
 		fmt.Println("Gagal load data:", err)
 		os.Exit(1)
@@ -37,8 +47,8 @@ func main() {
 		showAll := false
 
 		for _, arg := range os.Args[2:] {
-			if arg != "--all" {
-				fmt.Printf("flag yang anda ketik %q raib, coba flag ini: --all\n", arg)
+			if arg != "--all" && arg != "-all" {
+				fmt.Printf("flag yang anda ketik %q raib, coba flag ini: --all atau -all\n", arg)
 				os.Exit(1)
 			}
 			showAll = true
@@ -63,13 +73,13 @@ func main() {
 			shown++
 		}
 		if shown == 0 {
-			fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list -all")
+			fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list --all")
 		}
 
 	case "sudah":
 		id := parseID(os.Args, "sudah")
 		if err := list.Sudah(id); err != nil {
-			fmt.Println("Error", err)
+			fmt.Println("Error:", err)
 			os.Exit(1)
 		}
 		fmt.Printf("Bagoes! Aktivitas %d sudah ditandai terlaksana\n", id)
@@ -110,7 +120,7 @@ func main() {
 	}
 
 	if changed {
-		if err := SimpanAktivitas(dataFile, list); err != nil {
+		if err := SimpanAktivitas(path, list); err != nil {
 			fmt.Println("Gagal disimpan:", err)
 			os.Exit(1)
 		}
