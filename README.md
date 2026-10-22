@@ -1,13 +1,12 @@
 <div align="center">
 
-# mutabaah-cli
-
-**CLI sederhana untuk mencatat aktivitas ibadah dan rutinitas harian.**
-
-Dibuat dengan Go · Penyimpanan lokal berbasis JSON · Tanpa dependency eksternal
-
-<img src="https://img.shields.io/badge/Go-1.26.5-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go 1.26.5" />
-<img src="https://img.shields.io/badge/License-MIT-0B3D2E?style=flat-square" alt="MIT License" />
+<h1>mutabaah-cli</h1>
+<p><strong>CLI sederhana untuk mencatat aktivitas ibadah dan rutinitas harian.</strong></p>
+<p>Dibuat dengan Go · Penyimpanan lokal berbasis JSON · Tanpa dependency eksternal</p>
+<p>
+  <img src="https://img.shields.io/badge/Go-1.26.5-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go 1.26.5" />
+  <img src="https://img.shields.io/badge/License-MIT-0B3D2E?style=flat-square" alt="MIT License" />
+</p>
 
 </div>
 
@@ -123,7 +122,7 @@ Data disimpan pada direktori home pengguna, di dalam:
 
 Di Windows, lokasi ini berada di direktori home pengguna, pada folder `.mtcli\daftaraktivitas.json`.
 
-Direktori dan file dibuat otomatis ketika ada perubahan data yang perlu disimpan. Perintah yang hanya membaca data seperti `list` tidak menulis ulang file JSON.
+Direktori dan file dibuat otomatis ketika ada perubahan data yang perlu disimpan. Perintah baca-saja seperti `list` dan `help` tidak menulis ulang data; proses migrasi dapat menyalin file lama jika memang diperlukan.
 
 ### Migrasi dari penyimpanan lama
 
