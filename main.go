@@ -20,6 +20,15 @@ func main() {
 		return
 	}
 
+	switch command {
+	case "tambah", "list", "catat", "sudah", "hapus", "ubah":
+		// Known commands may access the data store.
+	default:
+		fmt.Printf("Perintah %q tidak dikenal. Berikut daftar perintah yang tersedia:\n\n", command)
+		printHelp()
+		os.Exit(1)
+	}
+
 	path, err := DataPath()
 	if err != nil {
 		fmt.Println("Error:", err)
