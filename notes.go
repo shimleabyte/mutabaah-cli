@@ -55,9 +55,7 @@ func (collection *NotesCollection) Add(lines []string, now time.Time) (Note, err
 	if err != nil {
 		return Note{}, err
 	}
-	if collection.NextID < 1 {
-		collection.NextID = collection.nextAvailableID()
-	}
+	collection.normalizeNextID()
 
 	note := Note{
 		ID:        collection.NextID,
