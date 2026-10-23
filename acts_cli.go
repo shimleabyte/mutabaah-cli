@@ -21,7 +21,7 @@ func runActs(args []string, out io.Writer) error {
 		judul   string
 		target  UkurTarget
 		id      int
-		showAll bool
+		showAll  bool
 		showDone bool
 		err     error
 	)
