@@ -162,8 +162,13 @@ func TestWrapNoteLineKeepsRunesAndRespectsWidth(t *testing.T) {
 		}
 	}
 	joined := strings.Join(wrapped, " ")
-	if !strings.Contains(joined, "日本語") || !strings.Contains(joined, "surprisinglylongwordthatmustbewrapped") {
-		t.Fatalf("wrapping dropped text: %q", joined)
+	if !strings.Contains(joined, "日本語") {
+		t.Fatalf("wrapping dropped Unicode text: %q", joined)
+	}
+	longWord := "surprisinglylongwordthatmustbewrapped"
+	longWordWrapped := wrapNoteLine(longWord, 12)
+	if got := strings.Join(longWordWrapped, ""); got != longWord {
+		t.Fatalf("wrapping changed a long word: %q", got)
 	}
 }
 
@@ -175,7 +180,7 @@ func TestPrintNotesTableWrapsTextAndShowsNewestFirst(t *testing.T) {
 	}
 
 	var output bytes.Buffer
-	printNotesTable(&output, notes, 18)
+	printNotesTable(&output, []Note{notes[1], notes[0]}, 18)
 	got := output.String()
 	if !strings.Contains(got, "ID") || !strings.Contains(got, "DATE") || !strings.Contains(got, "NOTE") {
 		t.Fatalf("missing table headings: %s", got)
@@ -265,11 +270,15 @@ func TestRunNotesCRUDAndIndependentStore(t *testing.T) {
 	if err := runNotes([]string{"delete", "1"}, &output); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := LoadNotes(notesPath); err != nil {
+	afterDelete, err := LoadNotes(notesPath)
+	if err != nil {
 		t.Fatal(err)
 	}
+	if _, err := afterDelete.Get(1); err == nil {
+		t.Fatal("deleted note should not remain in persisted store")
+	}
 	if _, err := note.Get(1); err != nil {
-		t.Fatalf("test fixture note should still exist in earlier in-memory copy: %v", err)
+		t.Fatalf("expected earlier in-memory fixture copy to remain unchanged: %v", err)
 	}
 }
 
