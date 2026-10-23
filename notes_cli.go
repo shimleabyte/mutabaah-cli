@@ -5,11 +5,10 @@ import (
 	"io"
 	"strconv"
 	"strings"
-	"text/tabwriter"
 	"time"
 )
 
-const notesTableTextWidth = 48
+const notesListTextWidth = 48
 
 func runNotes(args []string, out io.Writer) error {
 	if len(args) == 0 || isHelpArg(args[0]) {
@@ -75,7 +74,7 @@ func runNotes(args []string, out io.Writer) error {
 			fmt.Fprintln(out, "Belum ada catatan. Tambahkan dengan: mutabaah notes add \"isi catatan\"")
 			return nil
 		}
-		printNotesTable(out, collection.NewestFirst(), notesTableTextWidth)
+		printNotesList(out, collection.NewestFirst(), notesListTextWidth)
 		return nil
 
 	case "add":
@@ -140,7 +139,7 @@ func printNotesHelp(out io.Writer) {
 		"  mutabaah notes delete <id>\n"+
 		"  mutabaah notes help\n\n"+
 		"Setiap argumen teks menjadi satu baris logis. Catatan harus memiliki 1–5 baris.\n"+
-		"Tabel list membungkus teks panjang tanpa mengubah isi yang disimpan.\n"+
+		"List menampilkan catatan sebagai kartu ringkas dan membungkus teks panjang tanpa mengubah isi tersimpan.\n"+
 		"Data notes disimpan terpisah dari data acts.\n")
 }
 
@@ -154,34 +153,55 @@ func printNoteDetail(out io.Writer, note Note) {
 	}
 }
 
-func printNotesTable(out io.Writer, notes []Note, width int) {
+// printNotesList renders a compact journal-style feed. Each note gets its own
+// framed block, newest first. Wrapping affects presentation only.
+func printNotesList(out io.Writer, notes []Note, width int) {
 	if width < 1 {
-		width = notesTableTextWidth
+		width = notesListTextWidth
 	}
-	writer := tabwriter.NewWriter(out, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(writer, "ID\tDATE\tNOTE")
 
-	for _, note := range notes {
-		displayLines := make([]string, 0, len(note.Lines))
-		for _, line := range note.Lines {
-			displayLines = append(displayLines, wrapNoteLine(line, width)...)
-		}
-		if len(displayLines) == 0 {
-			displayLines = []string{""}
-		}
-		fmt.Fprintf(writer, "%d\t%s\t%s\n", note.ID, note.CreatedAt.Format("02 Jan"), displayLines[0])
-		for _, line := range displayLines[1:] {
-			fmt.Fprintf(writer, "\t\t%s\n", line)
-		}
+	countLabel := "entries"
+	if len(notes) == 1 {
+		countLabel = "entry"
 	}
-	_ = writer.Flush()
+	fmt.Fprintf(out, "NOTES  /  %d %s\n", len(notes), countLabel)
+
+	for i, note := range notes {
+		if i == 0 {
+			fmt.Fprintln(out)
+		} else {
+			fmt.Fprintln(out)
+		}
+
+		header := fmt.Sprintf("#%d · %s", note.ID, note.CreatedAt.Format("02 Jan 2006 15:04"))
+		if !note.UpdatedAt.Equal(note.CreatedAt) {
+			header += " · edited"
+		}
+
+		topPrefix := "─ " + header + " "
+		textWidth := width
+		if minimum := len([]rune(topPrefix)) - 4; minimum > textWidth {
+			textWidth = minimum
+		}
+		innerWidth := textWidth + 4
+		fmt.Fprintf(out, "┌%s%s┐\n", topPrefix, strings.Repeat("─", innerWidth-len([]rune(topPrefix))))
+
+		for _, logicalLine := range note.Lines {
+			wrapped := wrapNoteLine(logicalLine, textWidth)
+			for _, line := range wrapped {
+				lineWidth := len([]rune(line))
+				fmt.Fprintf(out, "│  %s%s  │\n", line, strings.Repeat(" ", textWidth-lineWidth))
+			}
+		}
+		fmt.Fprintf(out, "└%s┘\n", strings.Repeat("─", innerWidth))
+	}
 }
 
-// wrapNoteLine wraps one logical note line for display only. It counts Unicode
-// code points rather than UTF-8 bytes and breaks unusually long words safely.
+// wrapNoteLine wraps one logical note line. It counts Unicode code points
+// rather than UTF-8 bytes and safely breaks unusually long words.
 func wrapNoteLine(line string, width int) []string {
 	if width < 1 {
-		width = notesTableTextWidth
+		width = notesListTextWidth
 	}
 	words := strings.Fields(line)
 	if len(words) == 0 {
