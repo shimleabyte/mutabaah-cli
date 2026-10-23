@@ -45,6 +45,9 @@ func ValidateNoteLines(lines []string) ([]string, error) {
 		if line == "" {
 			return nil, fmt.Errorf("baris %d kosong; setiap baris harus berisi teks", i+1)
 		}
+		if strings.ContainsAny(line, "\r\n") {
+			return nil, fmt.Errorf("baris %d mengandung newline; gunakan satu argumen untuk setiap baris", i+1)
+		}
 		validated[i] = line
 	}
 	return validated, nil
