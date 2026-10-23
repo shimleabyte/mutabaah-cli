@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+const (
+	defaultTargetSesi    = 3
+	defaultTargetPeriode = 7
+)
+
 type Aktivitas struct {
 	Id         int        `json:"id"`
 	Judul      string     `json:"judul"`
