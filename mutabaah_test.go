@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestCatatIncrementsProgressAndCompletesAtTarget(t *testing.T) {
 	var list ListMutabaah
@@ -44,5 +47,24 @@ func TestSudahCompletesProgressTarget(t *testing.T) {
 	got := list.DaftarAktivitas[0]
 	if !got.IsDone || got.Progress != got.Target.Sesi {
 		t.Fatalf("manual completion inconsistent: %#v", got)
+	}
+}
+
+
+func TestTerlambatUsesTargetPeriodFromCreation(t *testing.T) {
+	createdAt := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
+	activity := Aktivitas{
+		DibuatSaat: createdAt,
+		Target:     UkurTarget{Sesi: 3, Periode: 7},
+	}
+	if activity.Terlambat(createdAt.AddDate(0, 0, 6)) {
+		t.Fatal("activity should not be late before target period passes")
+	}
+	if !activity.Terlambat(createdAt.AddDate(0, 0, 8)) {
+		t.Fatal("activity should be late after target period passes")
+	}
+	activity.IsDone = true
+	if activity.Terlambat(createdAt.AddDate(0, 0, 8)) {
+		t.Fatal("completed activity should not be overdue")
 	}
 }
