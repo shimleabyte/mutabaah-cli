@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -163,5 +164,38 @@ func TestTerlambatUsesTargetPeriodFromCreation(t *testing.T) {
 	activity.IsDone = true
 	if activity.Terlambat(createdAt.AddDate(0, 0, 8)) {
 		t.Fatal("completed activity should not be overdue")
+	}
+}
+
+
+func TestHelpDoesNotReadCorruptDataFile(t *testing.T) {
+	if os.Getenv("MUTABAAH_HELP_TEST_CHILD") == "1" {
+		os.Args = []string{"mutabaah-cli", "help"}
+		main()
+		return
+	}
+
+	home := t.TempDir()
+	dataPath := filepath.Join(home, appDir, dataFile)
+	if err := os.MkdirAll(filepath.Dir(dataPath), 0o700); err != nil {
+		t.Fatal(err)
+	}
+	const corruptJSON = "this is not valid JSON"
+	if err := os.WriteFile(dataPath, []byte(corruptJSON), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	cmd := exec.Command(os.Args[0], "-test.run=^TestHelpDoesNotReadCorruptDataFile$")
+	cmd.Env = append(os.Environ(), "MUTABAAH_HELP_TEST_CHILD=1", "HOME="+home)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Fatalf("help should succeed despite corrupt persisted data: %v\n%s", err, output)
+	}
+	after, err := os.ReadFile(dataPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(after) != corruptJSON {
+		t.Fatalf("help changed the data file: %q", after)
 	}
 }
