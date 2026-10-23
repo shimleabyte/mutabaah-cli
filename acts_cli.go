@@ -18,12 +18,12 @@ func runActs(args []string, out io.Writer) error {
 
 	command := args[0]
 	var (
-		judul   string
-		target  UkurTarget
-		id      int
+		judul    string
+		target   UkurTarget
+		id       int
 		showAll  bool
 		showDone bool
-		err     error
+		err      error
 	)
 
 	// Validate the subcommand and its arguments before resolving or loading data.
