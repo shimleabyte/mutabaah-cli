@@ -173,7 +173,7 @@ func TestWrapNoteLineKeepsRunesAndRespectsWidth(t *testing.T) {
 	}
 }
 
-func TestPrintNotesTableWrapsTextAndShowsNewestFirst(t *testing.T) {
+func TestPrintNotesListFramesCardsAndShowsNewestFirst(t *testing.T) {
 	now := time.Date(2026, 10, 23, 15, 0, 0, 0, time.UTC)
 	notes := []Note{
 		{ID: 1, Lines: []string{"older note"}, CreatedAt: now.Add(-time.Hour)},
@@ -181,10 +181,13 @@ func TestPrintNotesTableWrapsTextAndShowsNewestFirst(t *testing.T) {
 	}
 
 	var output bytes.Buffer
-	printNotesTable(&output, []Note{notes[1], notes[0]}, 18)
+	printNotesList(&output, []Note{notes[1], notes[0]}, 18)
 	got := output.String()
-	if !strings.Contains(got, "ID") || !strings.Contains(got, "DATE") || !strings.Contains(got, "NOTE") {
-		t.Fatalf("missing table headings: %s", got)
+	if !strings.Contains(got, "NOTES  /  2 entries") {
+		t.Fatalf("missing list heading: %s", got)
+	}
+	if !strings.Contains(got, "┌─ #2") || !strings.Contains(got, "└") {
+		t.Fatalf("notes should be rendered as framed cards: %s", got)
 	}
 	if strings.Index(got, "2") > strings.Index(got, "1") {
 		t.Fatalf("notes are not displayed newest first: %s", got)
