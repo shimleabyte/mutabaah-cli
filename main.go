@@ -45,13 +45,23 @@ func main() {
 	case "list":
 		changed = false
 		showAll := false
+		showDone := false
 
 		for _, arg := range os.Args[2:] {
-			if arg != "--all" && arg != "-all" {
-				fmt.Printf("flag yang anda ketik %q raib, coba flag ini: --all atau -all\n", arg)
+			switch arg {
+			case "--all", "-all":
+				showAll = true
+			case "--done", "-done":
+				showDone = true
+			default:
+				fmt.Printf("flag %q raib, coba: --all atau --done\n", arg)
 				os.Exit(1)
 			}
-			showAll = true
+		}
+
+		if showAll && showDone {
+			fmt.Println("--all dan --done tidak bisa dipakai bersamaan")
+			os.Exit(1)
 		}
 
 		if len(list.DaftarAktivitas) == 0 {
@@ -62,7 +72,10 @@ func main() {
 		shown := 0
 
 		for _, a := range list.DaftarAktivitas {
-			if a.IsDone && !showAll {
+			if a.IsDone && !showAll && !showDone {
+				continue
+			}
+			if !a.IsDone && showDone {
 				continue
 			}
 			status := "|Ncan|"
@@ -73,7 +86,11 @@ func main() {
 			shown++
 		}
 		if shown == 0 {
-			fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list --all")
+			if showDone {
+				fmt.Println("Belum ada aktivitas yang terlaksana. Tandai dengan: mutabaah-cli sudah <id>")
+			} else {
+				fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list --all")
+			}
 		}
 
 	case "sudah":
