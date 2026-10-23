@@ -166,12 +166,8 @@ func printNotesList(out io.Writer, notes []Note, width int) {
 	}
 	fmt.Fprintf(out, "NOTES  /  %d %s\n", len(notes), countLabel)
 
-	for i, note := range notes {
-		if i == 0 {
-			fmt.Fprintln(out)
-		} else {
-			fmt.Fprintln(out)
-		}
+	for _, note := range notes {
+		fmt.Fprintln(out)
 
 		header := fmt.Sprintf("#%d · %s", note.ID, note.CreatedAt.Format("02 Jan 2006 15:04"))
 		if !note.UpdatedAt.Equal(note.CreatedAt) {

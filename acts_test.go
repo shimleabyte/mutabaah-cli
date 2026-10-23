@@ -50,7 +50,6 @@ func TestSudahCompletesProgressTarget(t *testing.T) {
 	}
 }
 
-
 func TestTerlambatUsesTargetPeriodFromCreation(t *testing.T) {
 	createdAt := time.Date(2026, 10, 1, 12, 0, 0, 0, time.UTC)
 	activity := Aktivitas{
