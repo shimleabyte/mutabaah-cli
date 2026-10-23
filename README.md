@@ -12,91 +12,91 @@
 
 ---
 
-*Mutabaah* is a small command-line tool for tracking daily activities. The CLI is organized by domain: `acts` for activity tracking and `notes` as a planned, separate area for personal notes.
+*Mutabaah* adalah CLI kecil untuk mencatat aktivitas harian. Perintah dipisahkan berdasarkan domain: `acts` untuk pengelolaan aktivitas dan `notes` sebagai ruang terpisah untuk fitur catatan yang direncanakan.
 
-This project is also a way to learn Go through practical implementation: command routing, structs and slices, JSON persistence, input validation, progress tracking, and storage migration.
+Proyek ini juga menjadi sarana belajar Go melalui implementasi praktis: routing command, struct dan slice, persistensi JSON, validasi input, pencatatan progress, serta migrasi data.
 
-## Features
+## Fitur
 
-- Add activities with configurable session targets and deadlines.
-- Record each completed session and show progress as a terminal progress bar.
-- Automatically mark an activity complete when it reaches its session target.
-- List open activities, completed activities, or all activities.
-- Show overdue activities in the table.
-- Update activity titles and delete activities.
-- Store data locally in JSON and migrate the legacy data file when needed.
-- Keep root and domain help commands independent of the activity data store.
+- Menambahkan aktivitas dengan target sesi dan tenggat yang bisa diatur.
+- Mencatat sesi yang dilakukan dan menampilkan progress bar di terminal.
+- Menandai aktivitas selesai otomatis ketika target sesi tercapai.
+- Menampilkan aktivitas yang belum selesai, sudah selesai, atau semuanya.
+- Menampilkan aktivitas yang melewati tenggat.
+- Mengubah judul dan menghapus aktivitas.
+- Menyimpan data secara lokal dalam JSON serta memigrasikan file data lama jika diperlukan.
+- Menampilkan bantuan tanpa membaca atau mengubah data aktivitas.
 
-## Requirements
+## Persyaratan
 
-- [Go](https://go.dev/dl/) **1.26.5 or newer**, as declared in `go.mod`.
-- Standard library only; no external dependencies.
+- [Go](https://go.dev/dl/) **1.26.5 atau lebih baru**, sesuai deklarasi di `go.mod`.
+- Hanya menggunakan standard library Go; tidak ada dependency eksternal.
 
-## Getting started
+## Memulai
 
-Clone the repository:
+Clone repositori:
 
 ```bash
 git clone https://github.com/shimleabyte/mutabaah-cli.git
 cd mutabaah-cli
 ```
 
-Run without building a binary:
+Jalankan tanpa membuat binary:
 
 ```bash
 go run . help
 ```
 
-Or build the shorter `mutabaah` executable:
+Atau build executable dengan nama yang lebih pendek, `mutabaah`:
 
 ```bash
 go build -o mutabaah .
 ./mutabaah help
 ```
 
-On Windows:
+Di Windows:
 
 ```powershell
 go build -o mutabaah.exe .
 .\\mutabaah.exe help
 ```
 
-## Command structure
+## Struktur command
 
-The root command separates features by domain.
+Command root membagi fitur berdasarkan domain.
 
-| Command | Purpose |
+| Command | Fungsi |
 |---|---|
-| `mutabaah acts list` | List activities |
-| `mutabaah acts tambah "Activity title"` | Add an activity |
-| `mutabaah acts catat <id>` | Record one session |
-| `mutabaah acts sudah <id>` | Mark an activity complete manually |
-| `mutabaah acts ubah <id> "New title"` | Rename an activity |
-| `mutabaah acts hapus <id>` | Delete an activity |
-| `mutabaah acts help` | Show activity command help |
-| `mutabaah notes` | Notes module placeholder; not implemented yet |
-| `mutabaah help` | Show root help |
+| `mutabaah acts list` | Menampilkan aktivitas |
+| `mutabaah acts tambah "Judul aktivitas"` | Menambahkan aktivitas |
+| `mutabaah acts catat <id>` | Mencatat satu sesi |
+| `mutabaah acts sudah <id>` | Menandai aktivitas selesai secara manual |
+| `mutabaah acts ubah <id> "Judul baru"` | Mengubah judul aktivitas |
+| `mutabaah acts hapus <id>` | Menghapus aktivitas |
+| `mutabaah acts help` | Menampilkan bantuan domain aktivitas |
+| `mutabaah notes` | Placeholder domain catatan; belum tersedia |
+| `mutabaah help` | Menampilkan bantuan root |
 
-`mutabaah notes` is reserved for a separate notes domain. Notes commands do not currently create, read, update, or delete notes.
+Domain `notes` disiapkan sebagai bagian terpisah. Saat ini, command tersebut belum membuat, membaca, mengubah, atau menghapus catatan.
 
-## Activity targets
+## Target aktivitas
 
-New activities use a default target of **3 sessions within 7 days**. Set a per-activity target with `--sesi` and `--periode`:
+Target default aktivitas baru adalah **3 sesi dalam 7 hari**. Target per aktivitas dapat ditetapkan menggunakan `--sesi` dan `--periode`:
 
 ```bash
 ./mutabaah acts tambah "Tilawah satu juz" --sesi 5 --periode 10
 ```
 
-- `--sesi` is the number of sessions needed to complete the activity.
-- `--periode` is a one-time deadline in days, measured from when the activity was created.
-- `catat <id>` increments progress by one session.
-- Once progress reaches the target, the activity is marked complete.
-- `sudah <id>` remains available as a manual completion shortcut.
-- The deadline does not reset automatically. Recurring periods are not implemented yet.
+- `--sesi` adalah jumlah sesi yang diperlukan untuk menyelesaikan target.
+- `--periode` adalah tenggat satu kali dalam hari, dihitung sejak aktivitas dibuat.
+- `catat <id>` menambah progress satu sesi.
+- Ketika progress mencapai target, aktivitas otomatis ditandai selesai.
+- `sudah <id>` tetap tersedia untuk menyelesaikan aktivitas secara manual.
+- Tenggat tidak otomatis di-reset. Periode berulang belum diimplementasikan.
 
-## Listing activities
+## Menampilkan aktivitas
 
-The default list shows only activities that are not complete.
+Secara default, list hanya menampilkan aktivitas yang belum selesai.
 
 ```bash
 ./mutabaah acts list
@@ -104,7 +104,7 @@ The default list shows only activities that are not complete.
 ./mutabaah acts list --all
 ```
 
-Example output:
+Contoh output:
 
 ```text
 ID  STATE  ACTIVITY           PROGRESS          DEADLINE
@@ -113,29 +113,29 @@ ID  STATE  ACTIVITY           PROGRESS          DEADLINE
 3   DONE   Sholat Dhuha       [##########] 3/3  complete
 ```
 
-| State | Meaning |
+| Status | Arti |
 |---|---|
-| `OPEN` | Activity is not complete and is within its deadline |
-| `LATE` | Activity is not complete and its deadline has passed |
-| `DONE` | Session target was reached or completion was marked manually |
+| `OPEN` | Aktivitas belum selesai dan tenggat belum lewat |
+| `LATE` | Aktivitas belum selesai dan tenggat sudah lewat |
+| `DONE` | Target sesi tercapai atau aktivitas diselesaikan manual |
 
-Progress bars use `#` for recorded sessions and `-` for remaining sessions. `--done` lists only completed activities; `--all` includes every activity.
+Progress bar menggunakan `#` untuk sesi yang tercatat dan `-` untuk sisa sesi. `--done` hanya menampilkan aktivitas selesai, sedangkan `--all` menampilkan semuanya.
 
-## Data storage
+## Penyimpanan data
 
-Activity data is stored in the user's home directory:
+Data aktivitas disimpan di direktori home pengguna:
 
 ```text
 ~/.mtcli/daftaraktivitas.json
 ```
 
-The CLI creates the directory and file when a change needs to be saved. Commands such as `mutabaah help` and `mutabaah acts help` return before locating, migrating, or loading stored activity data, so help remains available when the JSON file is invalid.
+Direktori dan file dibuat ketika ada perubahan yang perlu disimpan. Command `mutabaah help` dan `mutabaah acts help` berhenti sebelum mencari lokasi data, menjalankan migrasi, atau membaca JSON. Jadi, bantuan tetap tersedia ketika file JSON rusak.
 
-### Legacy migration
+### Migrasi data lama
 
-If the new data file does not exist and `daftaraktivitas.json` is found in the current working directory, the legacy file is copied to the new location. The original file is not removed automatically.
+Jika file penyimpanan baru belum ada dan `daftaraktivitas.json` ditemukan di direktori kerja saat ini, file lama akan disalin ke lokasi baru. File asal tidak dihapus secara otomatis.
 
-### JSON format
+### Format JSON
 
 ```json
 {
@@ -155,26 +155,26 @@ If the new data file does not exist and `daftaraktivitas.json` is found in the c
 }
 ```
 
-The target fields use lowercase JSON keys (`sesi` and `periode`). Existing data with the older `Sesi` and `Periode` keys remains readable.
+Key target menggunakan huruf kecil (`sesi` dan `periode`). File lama dengan key `Sesi` dan `Periode` tetap dapat dibaca.
 
-## Project structure
+## Struktur proyek
 
-| File | Responsibility |
+| File | Tanggung jawab |
 |---|---|
-| `main.go` | Root/domain routing, argument parsing, table output, and activity commands |
-| `mutabaah.go` | Activity model, session progress, completion, and deadline logic |
-| `inventory.go` | Data path, JSON persistence, legacy-data normalization, and migration |
-| `main_test.go` | Argument parsing, JSON compatibility, and help-routing tests |
-| `mutabaah_test.go` | Session progress, completion, and deadline tests |
-| `table_test.go` | Progress-bar, table-rendering, and command-routing tests |
+| `main.go` | Routing root/domain, parsing argumen, output tabel, dan command aktivitas |
+| `mutabaah.go` | Model aktivitas, progress sesi, penyelesaian target, dan tenggat |
+| `inventory.go` | Lokasi data, persistensi JSON, normalisasi data lama, dan migrasi |
+| `main_test.go` | Tes parsing argumen, kompatibilitas JSON, dan routing bantuan |
+| `mutabaah_test.go` | Tes progress sesi, penyelesaian, dan tenggat |
+| `table_test.go` | Tes progress bar, output tabel, dan routing command |
 
-## Current design boundaries
+## Batasan desain saat ini
 
-- `acts` is implemented; `notes` is only a placeholder.
-- A period is a one-time deadline, not a recurring cycle.
-- IDs are derived from the last remaining activity ID plus one, so deleting the last activity can cause an ID to be reused.
-- `sudah <id>` can mark an activity complete without recording each individual session.
+- Domain `acts` sudah tersedia; `notes` masih berupa placeholder.
+- Periode merupakan tenggat satu kali, bukan siklus berulang.
+- ID baru dihitung dari ID aktivitas terakhir yang masih ada, sehingga menghapus aktivitas terakhir dapat membuat ID tersebut dipakai kembali.
+- `sudah <id>` dapat menuntaskan aktivitas tanpa mencatat setiap sesi satu per satu.
 
-## License
+## Lisensi
 
-Released under the [MIT License](LICENSE).
+Dirilis di bawah [MIT License](LICENSE).
