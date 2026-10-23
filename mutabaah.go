@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 )
 
@@ -15,8 +16,8 @@ type Aktivitas struct {
 }
 
 type UkurTarget struct {
-	Sesi    int
-	Periode int
+	Sesi    int `json:"sesi"`
+	Periode int `json:"periode"`
 }
 
 type ListMutabaah struct {
@@ -24,37 +25,86 @@ type ListMutabaah struct {
 }
 
 func (lm *ListMutabaah) Tambah(judul string) Aktivitas {
+	aktivitas, _ := lm.TambahDenganTarget(judul, UkurTarget{
+		Sesi:    defaultTargetSesi,
+		Periode: defaultTargetPeriode,
+	})
+	return aktivitas
+}
 
-	IdBaru := 1
-	target := UkurTarget{3, 7}
+func (lm *ListMutabaah) TambahDenganTarget(judul string, target UkurTarget) (Aktivitas, error) {
+	judul = strings.TrimSpace(judul)
+	if judul == "" {
+		return Aktivitas{}, fmt.Errorf("judul aktivitas tidak boleh kosong")
+	}
+	if target.Sesi <= 0 || target.Periode <= 0 {
+		return Aktivitas{}, fmt.Errorf("target sesi dan periode harus berupa angka positif")
+	}
 
+	idBaru := 1
 	if len(lm.DaftarAktivitas) > 0 {
-		IdBaru = lm.DaftarAktivitas[len(lm.DaftarAktivitas)-1].Id + 1
+		idBaru = lm.DaftarAktivitas[len(lm.DaftarAktivitas)-1].Id + 1
 	}
 
 	aktivitas := Aktivitas{
-		Id:         IdBaru,
+		Id:         idBaru,
 		Judul:      judul,
 		Target:     target,
 		Progress:   0,
 		IsDone:     false,
 		DibuatSaat: time.Now(),
 	}
-
 	lm.DaftarAktivitas = append(lm.DaftarAktivitas, aktivitas)
-	return aktivitas
+	return aktivitas, nil
 }
 
-func (lm *ListMutabaah) Sudah(id int) error {
-	done := true
-
+// Catat menambah satu sesi progress. Aktivitas selesai saat jumlah sesi
+// mencapai target. Periode digunakan sebagai batas waktu sejak aktivitas dibuat.
+func (lm *ListMutabaah) Catat(id int) (Aktivitas, error) {
 	for i := range lm.DaftarAktivitas {
-		if lm.DaftarAktivitas[i].Id == id {
-			lm.DaftarAktivitas[i].IsDone = done
-			return nil
+		aktivitas := &lm.DaftarAktivitas[i]
+		if aktivitas.Id != id {
+			continue
 		}
+		if aktivitas.IsDone {
+			return Aktivitas{}, fmt.Errorf("aktivitas dengan ID %d sudah selesai", id)
+		}
+		if aktivitas.Target.Sesi <= 0 {
+			return Aktivitas{}, fmt.Errorf("target sesi aktivitas %d tidak valid", id)
+		}
+
+		aktivitas.Progress++
+		if aktivitas.Progress >= aktivitas.Target.Sesi {
+			aktivitas.Progress = aktivitas.Target.Sesi
+			aktivitas.IsDone = true
+		}
+		return *aktivitas, nil
 	}
-	return fmt.Errorf("Lupakah dengan agenda anda? \n id %d tidak ada dalam list mutabaah yang sudah anda buat, cek dengan perintah 'list'", id)
+	return Aktivitas{}, fmt.Errorf("aktivitas dengan ID %d tidak ditemukan; periksa dengan perintah list", id)
+}
+
+// Sudah merupakan shortcut manual untuk menuntaskan target aktivitas.
+func (lm *ListMutabaah) Sudah(id int) error {
+	for i := range lm.DaftarAktivitas {
+		aktivitas := &lm.DaftarAktivitas[i]
+		if aktivitas.Id != id {
+			continue
+		}
+		aktivitas.IsDone = true
+		if aktivitas.Target.Sesi > 0 {
+			aktivitas.Progress = aktivitas.Target.Sesi
+		}
+		return nil
+	}
+	return fmt.Errorf("aktivitas dengan ID %d tidak ditemukan; periksa dengan perintah list", id)
+}
+
+func (a Aktivitas) Terlambat(now time.Time) bool {
+	if a.IsDone || a.Target.Periode <= 0 || a.DibuatSaat.IsZero() {
+		return false
+	}
+	deadline := a.DibuatSaat.AddDate(0, 0, a.Target.Periode)
+	return now.After(deadline)
 }
 
 func (lm *ListMutabaah) Hapus(id int) error {
