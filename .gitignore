@@ -1,37 +1,31 @@
-# Include this file in your root directory as `.gitignore`
-
-# Binaries and Icons
-# Generated executable binaries (e.g., from `go build`)
+# Local build outputs
+/mutabaah
 *.exe
 *.exe~
 *.dll
 *.so
 *.dylib
+bin/
+dist/
 
-# Test and Coverage Artifacts
+# Go test and coverage artifacts
 *.test
 *.out
 *.coverprofile
 profile.cov
 
-# Output directory for custom builds (commonly used)
-bin/
-dist/
-
-# Dynamic data and runtime output
+# Local application data (may contain private activity or note content)
 daftaraktivitas.json
+notes.json
+.mtcli/
 
-# Project Workspace and Environment Files
+# Environment and workspace files
 go.work
 go.work.sum
 .env
 .env.*
 
-# Dependency Directories
-# Uncomment the line below if you prefer NOT to vendor your dependencies.
-# vendor/
-
-# Developer / IDE Configurations
+# Developer / IDE configurations
 .idea/
 .vscode/
 *.suo
@@ -39,3 +33,9 @@ go.work.sum
 *.njsproj
 *.sln
 *.sw?
+.fleet/
+
+# OS and log files
+.DS_Store
+Thumbs.db
+*.log
