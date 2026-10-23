@@ -1,180 +1,189 @@
 <div align="center">
 
-<h1>mutabaah</h1>
-<p><strong>CLI untuk mencatat aktivitas harian dengan target sesi dan tenggat.</strong></p>
-<p>Go · Penyimpanan JSON lokal · Tanpa dependency eksternal</p>
-<p>
-  <img src="https://img.shields.io/badge/Go-1.26.5-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go 1.26.5" />
-  <img src="https://img.shields.io/badge/License-MIT-0B3D2E?style=flat-square" alt="MIT License" />
-</p>
+# mutabaah
+
+**A compact CLI for daily activities and short notes.**
+
+Go · Local JSON storage · Standard library only
+
+<img src="https://img.shields.io/badge/Go-1.26.5-00ADD8?style=flat-square&logo=go&logoColor=white" alt="Go 1.26.5" />
+<img src="https://img.shields.io/badge/License-MIT-0B3D2E?style=flat-square" alt="MIT License" />
 
 </div>
 
 ---
 
-*Mutabaah* adalah CLI kecil untuk mencatat aktivitas harian. Perintah dipisahkan berdasarkan domain: `acts` untuk pengelolaan aktivitas dan `notes` sebagai ruang terpisah untuk fitur catatan yang direncanakan.
+Mutabaah organizes its commands by domain: **acts** tracks activities and their session targets, while **notes** stores small text notes that can be reviewed quickly from the terminal.
 
-Proyek ini juga menjadi sarana belajar Go melalui implementasi praktis: routing command, struct dan slice, persistensi JSON, validasi input, pencatatan progress, serta migrasi data.
+## Features
 
-## Fitur
+- Add activities with configurable session targets and deadlines.
+- Track activity progress with a terminal progress bar.
+- Manage short notes containing one to five logical lines.
+- List notes in a compact table with wrapped text, newest first.
+- Keep note storage separate from activity storage.
+- Preserve notes IDs when an entry is deleted.
+- Use local JSON storage without external dependencies.
 
-- Menambahkan aktivitas dengan target sesi dan tenggat yang bisa diatur.
-- Mencatat sesi yang dilakukan dan menampilkan progress bar di terminal.
-- Menandai aktivitas selesai otomatis ketika target sesi tercapai.
-- Menampilkan aktivitas yang belum selesai, sudah selesai, atau semuanya.
-- Menampilkan aktivitas yang melewati tenggat.
-- Mengubah judul dan menghapus aktivitas.
-- Menyimpan data secara lokal dalam JSON serta memigrasikan file data lama jika diperlukan.
-- Menampilkan bantuan tanpa membaca atau mengubah data aktivitas.
+## Requirements
 
-## Persyaratan
+- [Go](https://go.dev/dl/) **1.26.5 or newer**, as declared in go.mod.
+- No external dependencies.
 
-- [Go](https://go.dev/dl/) **1.26.5 atau lebih baru**, sesuai deklarasi di `go.mod`.
-- Hanya menggunakan standard library Go; tidak ada dependency eksternal.
+## Getting started
 
-## Memulai
-
-Clone repositori:
+Clone the repository:
 
 ```bash
 git clone https://github.com/shimleabyte/mutabaah-cli.git
 cd mutabaah-cli
 ```
 
-Jalankan tanpa membuat binary:
-
-```bash
-go run . help
-```
-
-Atau build executable dengan nama yang lebih pendek, `mutabaah`:
+Build the shorter executable:
 
 ```bash
 go build -o mutabaah .
 ./mutabaah help
 ```
 
-Di Windows:
+Or run from the source directory:
 
-```powershell
-go build -o mutabaah.exe .
-.\\mutabaah.exe help
+```bash
+go run . help
 ```
 
-## Struktur command
+## Command structure
 
-Command root membagi fitur berdasarkan domain.
+### Activities
 
-| Command | Fungsi |
+| Command | Purpose |
 |---|---|
-| `mutabaah acts list` | Menampilkan aktivitas |
-| `mutabaah acts tambah "Judul aktivitas"` | Menambahkan aktivitas |
-| `mutabaah acts catat <id>` | Mencatat satu sesi |
-| `mutabaah acts sudah <id>` | Menandai aktivitas selesai secara manual |
-| `mutabaah acts ubah <id> "Judul baru"` | Mengubah judul aktivitas |
-| `mutabaah acts hapus <id>` | Menghapus aktivitas |
-| `mutabaah acts help` | Menampilkan bantuan domain aktivitas |
-| `mutabaah notes` | Placeholder domain catatan; belum tersedia |
-| `mutabaah help` | Menampilkan bantuan root |
+| `mutabaah acts list` | List unfinished activities |
+| `mutabaah acts list --done` | List completed activities |
+| `mutabaah acts list --all` | List all activities |
+| `mutabaah acts tambah "Activity title" --sesi 5 --periode 10` | Add an activity with a target |
+| `mutabaah acts catat <id>` | Record one session |
+| `mutabaah acts sudah <id>` | Mark an activity complete manually |
+| `mutabaah acts ubah <id> "New title"` | Rename an activity |
+| `mutabaah acts hapus <id>` | Delete an activity |
 
-Domain `notes` disiapkan sebagai bagian terpisah. Saat ini, command tersebut belum membuat, membaca, mengubah, atau menghapus catatan.
+### Notes
 
-## Target aktivitas
+| Command | Purpose |
+|---|---|
+| `mutabaah notes add "line 1" ["line 2" ...]` | Add a note with one to five lines |
+| `mutabaah notes list` | List notes in a compact table |
+| `mutabaah notes show <id>` | Display a note in full |
+| `mutabaah notes edit <id> "line 1" ["line 2" ...]` | Replace a note's content |
+| `mutabaah notes delete <id>` | Delete a note |
+| `mutabaah notes help` | Show notes help |
 
-Target default aktivitas baru adalah **3 sesi dalam 7 hari**. Target per aktivitas dapat ditetapkan menggunakan `--sesi` dan `--periode`:
+Each quoted text argument becomes one logical line. Notes require one to five non-empty lines; blank lines are rejected.
 
-```bash
-./mutabaah acts tambah "Tilawah satu juz" --sesi 5 --periode 10
-```
+## Notes workflow
 
-- `--sesi` adalah jumlah sesi yang diperlukan untuk menyelesaikan target.
-- `--periode` adalah tenggat satu kali dalam hari, dihitung sejak aktivitas dibuat.
-- `catat <id>` menambah progress satu sesi.
-- Ketika progress mencapai target, aktivitas otomatis ditandai selesai.
-- `sudah <id>` tetap tersedia untuk menyelesaikan aktivitas secara manual.
-- Tenggat tidak otomatis di-reset. Periode berulang belum diimplementasikan.
-
-## Menampilkan aktivitas
-
-Secara default, list hanya menampilkan aktivitas yang belum selesai.
+Add a short, one-line note:
 
 ```bash
-./mutabaah acts list
-./mutabaah acts list --done
-./mutabaah acts list --all
+./mutabaah notes add "Review error handling before release"
 ```
 
-Contoh output:
+Add a note with multiple lines. Each quoted argument becomes one line in the stored note:
+
+```bash
+./mutabaah notes add \
+  "Migration must be idempotent" \
+  "Do not delete the source file automatically" \
+  "Add a regression test"
+```
+
+List notes:
+
+```bash
+./mutabaah notes list
+```
+
+Example output:
 
 ```text
-ID  STATE  ACTIVITY           PROGRESS          DEADLINE
-1   OPEN   Tilawah satu juz   [####------] 2/5  5d left
-2   LATE   Murajaah           [##--------] 1/5  late 3d
-3   DONE   Sholat Dhuha       [##########] 3/3  complete
+ID  DATE   NOTE
+12  23 Oct Migration must be idempotent. Do not delete
+          the source file before the new data is verified.
+11  22 Oct Progress should remain consistent with session
+          targets. A completed item must not contradict
+          its own target.
 ```
 
-| Status | Arti |
-|---|---|
-| `OPEN` | Aktivitas belum selesai dan tenggat belum lewat |
-| `LATE` | Aktivitas belum selesai dan tenggat sudah lewat |
-| `DONE` | Target sesi tercapai atau aktivitas diselesaikan manual |
+The NOTE column wraps at a fixed width of 48 Unicode code points. Wrapping is for display only: it does not add lines to the saved note or change its content. Notes are ordered newest first.
 
-Progress bar menggunakan `#` untuk sesi yang tercatat dan `-` untuk sisa sesi. `--done` hanya menampilkan aktivitas selesai, sedangkan `--all` menampilkan semuanya.
+Show or edit one note:
 
-## Penyimpanan data
+```bash
+./mutabaah notes show 12
+./mutabaah notes edit 12 \
+  "Migration must be idempotent" \
+  "Validate the destination before cleanup"
+```
 
-Data aktivitas disimpan di direktori home pengguna:
+Editing replaces all existing note lines. It updates updatedAt while preserving createdAt.
+
+## Notes data model
+
+Each note contains an ID, one to five logical text lines, a creation timestamp, and an update timestamp. The collection also persists nextId so removing the highest-numbered note does not cause that ID to be reused.
+
+Notes are stored independently at:
+
+```text
+~/.mtcli/notes.json
+```
+
+Activity data remains in its own file:
 
 ```text
 ~/.mtcli/daftaraktivitas.json
 ```
 
-Direktori dan file dibuat ketika ada perubahan yang perlu disimpan. Command `mutabaah help` dan `mutabaah acts help` berhenti sebelum mencari lokasi data, menjalankan migrasi, atau membaca JSON. Jadi, bantuan tetap tersedia ketika file JSON rusak.
+If notes.json is missing, the notes list starts empty. Invalid JSON or invalid note records return an error; the CLI does not silently replace a corrupt notes file with an empty collection.
 
-### Migrasi data lama
-
-Jika file penyimpanan baru belum ada dan `daftaraktivitas.json` ditemukan di direktori kerja saat ini, file lama akan disalin ke lokasi baru. File asal tidak dihapus secara otomatis.
-
-### Format JSON
+Example JSON:
 
 ```json
 {
-  "daftarAktivitas": [
+  "nextId": 13,
+  "notes": [
     {
-      "id": 1,
-      "judul": "Tilawah satu juz",
-      "target": {
-        "sesi": 5,
-        "periode": 10
-      },
-      "proses": 2,
-      "ketuntasan": false,
-      "dibuatSaat": "2026-10-23T07:30:00Z"
+      "id": 12,
+      "lines": [
+        "Migration must be idempotent.",
+        "Do not delete the source file automatically."
+      ],
+      "createdAt": "2026-10-23T08:30:00Z",
+      "updatedAt": "2026-10-23T08:30:00Z"
     }
   ]
 }
 ```
 
-Key target menggunakan huruf kecil (`sesi` dan `periode`). File lama dengan key `Sesi` dan `Periode` tetap dapat dibaca.
+## Project structure
 
-## Struktur proyek
-
-| File | Tanggung jawab |
+| File | Responsibility |
 |---|---|
-| `main.go` | Routing root/domain, parsing argumen, output tabel, dan command aktivitas |
-| `mutabaah.go` | Model aktivitas, progress sesi, penyelesaian target, dan tenggat |
-| `inventory.go` | Lokasi data, persistensi JSON, normalisasi data lama, dan migrasi |
-| `main_test.go` | Tes parsing argumen, kompatibilitas JSON, dan routing bantuan |
-| `mutabaah_test.go` | Tes progress sesi, penyelesaian, dan tenggat |
-| `table_test.go` | Tes progress bar, output tabel, dan routing command |
+| main.go | Root and domain command routing, activity table, activity commands |
+| mutabaah.go | Activity model, session progress, completion, and deadlines |
+| inventory.go | Activity JSON persistence and legacy migration |
+| notes.go | Note model, one-to-five-line validation, CRUD operations, ID sequencing |
+| notes_store.go | Separate notes storage and JSON validation |
+| notes_cli.go | Notes commands, detail view, wrapping, and list table |
+| notes_test.go | Notes validation, storage, CRUD, wrapping, and routing tests |
+| table_test.go | Activity progress table and root routing tests |
 
-## Batasan desain saat ini
+## Current boundaries
 
-- Domain `acts` sudah tersedia; `notes` masih berupa placeholder.
-- Periode merupakan tenggat satu kali, bukan siklus berulang.
-- ID baru dihitung dari ID aktivitas terakhir yang masih ada, sehingga menghapus aktivitas terakhir dapat membuat ID tersebut dipakai kembali.
-- `sudah <id>` dapat menuntaskan aktivitas tanpa mencatat setiap sesi satu per satu.
+- Notes are plain text, without tags, categories, search, attachments, or rich-text formatting.
+- A note has a maximum of five logical lines; visual wrapping does not count toward that limit.
+- Notes and activities are separate JSON files. They are local to the current user account and do not sync across devices.
+- Activity periods remain one-time deadlines; recurring activity cycles are not implemented.
 
-## Lisensi
+## License
 
-Dirilis di bawah [MIT License](LICENSE).
+Released under the [MIT License](LICENSE).

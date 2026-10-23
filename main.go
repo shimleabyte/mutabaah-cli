@@ -18,8 +18,8 @@ func main() {
 	}
 }
 
-// run routes the root command before touching the data store. Help, unknown
-// domains, and the not-yet-implemented notes domain do not load activity data.
+// run routes root and domain commands before touching activity storage. Notes
+// use an independent store and help commands return before either store is read.
 func run(args []string, out io.Writer) error {
 	if len(args) == 0 || isHelpArg(args[0]) {
 		printRootHelp(out)
@@ -35,14 +35,6 @@ func run(args []string, out io.Writer) error {
 		printRootHelp(out)
 		return fmt.Errorf("domain %q tidak dikenal", args[0])
 	}
-}
-
-func runNotes(args []string, out io.Writer) error {
-	if len(args) == 0 || isHelpArg(args[0]) {
-		printNotesHelp(out)
-		return nil
-	}
-	return fmt.Errorf("modul notes belum diimplementasikan; command ini belum membaca atau mengubah data")
 }
 
 func runActs(args []string, out io.Writer) error {
@@ -178,13 +170,14 @@ func printRootHelp(out io.Writer) {
 	fmt.Fprint(out, "mutabaah — pencatatan aktivitas dan catatan pribadi\n\n"+
 		"Penggunaan:\n"+
 		"  mutabaah acts <command>     Kelola aktivitas\n"+
-		"  mutabaah notes              Catatan pribadi (belum tersedia)\n"+
+		"  mutabaah notes <command>    Kelola catatan pendek (1–5 baris)\n"+
 		"  mutabaah help               Tampilkan bantuan\n\n"+
 		"Contoh:\n"+
 		"  mutabaah acts list\n"+
 		"  mutabaah acts tambah \"Tilawah satu juz\" --sesi 3 --periode 7\n"+
 		"  mutabaah acts catat 1\n"+
-		"  mutabaah notes\n")
+		"  mutabaah notes add \"Review error handling\"\n"+
+		"  mutabaah notes list\n")
 }
 
 func printActsHelp(out io.Writer) {
@@ -200,15 +193,6 @@ func printActsHelp(out io.Writer) {
 		"list tanpa flag menampilkan aktivitas yang belum selesai.\n"+
 		"--done menampilkan aktivitas yang selesai; --all menampilkan semuanya.\n"+
 		"Target default: 3 sesi dalam 7 hari sejak aktivitas dibuat.\n")
-}
-
-func printNotesHelp(out io.Writer) {
-	fmt.Fprint(out, "mutabaah notes — catatan pribadi\n\n"+
-		"Modul notes belum diimplementasikan. Command ini belum membaca atau mengubah data.\n"+
-		"Rencana command akan dipisahkan dari acts, misalnya:\n"+
-		"  mutabaah notes list\n"+
-		"  mutabaah notes add \"judul catatan\"\n"+
-		"  mutabaah notes show <id>\n")
 }
 
 func parseTambahArgs(args []string) (string, UkurTarget, error) {
