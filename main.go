@@ -18,8 +18,8 @@ func main() {
 	}
 }
 
-// run routes the root command before touching the data store. Help, unknown
-// domains, and the not-yet-implemented notes domain do not load activity data.
+// run routes root and domain commands before touching activity storage. Notes
+// use an independent store and help commands return before either store is read.
 func run(args []string, out io.Writer) error {
 	if len(args) == 0 || isHelpArg(args[0]) {
 		printRootHelp(out)
