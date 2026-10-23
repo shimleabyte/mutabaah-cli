@@ -89,7 +89,7 @@ func main() {
 			if showDone {
 				fmt.Println("Belum ada aktivitas yang terlaksana. Tandai dengan: mutabaah-cli sudah <id>")
 			} else {
-				fmt.Println("Aiight bro that's it you're complete your goals, lihat semua goal dengan: mutabaah-cli list --all")
+				fmt.Println("Aiight bro that's it you completed your goals, lihat semua goal dengan: mutabaah-cli list --all")
 			}
 		}
 
