@@ -4,17 +4,17 @@ on:
   push:
     branches:
       - main
-      - feature/acts-table-command-groups
   pull_request:
     branches:
       - main
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
-  test:
-    name: Test and vet
+  check:
+    name: Format, test, vet, and build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,8 +26,19 @@ jobs:
           go-version-file: go.mod
           cache: true
 
+      - name: Check formatting
+        run: |
+          files="$(gofmt -l .)"
+          if [ -n "$files" ]; then
+            printf 'These Go files need gofmt:\n%s\n' "$files"
+            exit 1
+          fi
+
       - name: Run tests
-        run: go test ./...
+        run: go test -race ./...
 
       - name: Run vet
         run: go vet ./...
+
+      - name: Build CLI
+        run: go build -o mutabaah .
