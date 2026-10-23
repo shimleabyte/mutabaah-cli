@@ -163,15 +163,6 @@ func main() {
 
 		fmt.Printf("Aktivitas %d berhasil diubah menjadi \"%s\"\n", id, judulBaru)
 
-	case "help":
-		changed = false
-		printHelp()
-	default:
-		changed = false
-		fmt.Printf("Perintah %q tidak dikenal. Berikut daftar perintah yang tersedia:\n\n", command)
-		printHelp()
-		os.Exit(1)
-
 	}
 
 	if changed {
