@@ -47,6 +47,9 @@ func LoadNotes(path string) (NotesCollection, error) {
 		if _, err := ValidateNoteLines(note.Lines); err != nil {
 			return EmptyNotesCollection(), fmt.Errorf("data notes rusak pada ID %d: %w", note.ID, err)
 		}
+		if note.CreatedAt.IsZero() || note.UpdatedAt.IsZero() {
+			return EmptyNotesCollection(), fmt.Errorf("data notes rusak pada ID %d: timestamp tidak lengkap", note.ID)
+		}
 	}
 
 	collection.normalizeNextID()
@@ -55,12 +58,20 @@ func LoadNotes(path string) (NotesCollection, error) {
 
 func SaveNotes(path string, collection NotesCollection) error {
 	collection.normalizeNextID()
+	seen := make(map[int]struct{}, len(collection.Notes))
 	for _, note := range collection.Notes {
 		if note.ID < 1 {
 			return fmt.Errorf("ID catatan harus positif")
 		}
+		if _, exists := seen[note.ID]; exists {
+			return fmt.Errorf("ID catatan %d duplikat", note.ID)
+		}
+		seen[note.ID] = struct{}{}
 		if _, err := ValidateNoteLines(note.Lines); err != nil {
 			return fmt.Errorf("catatan ID %d tidak valid: %w", note.ID, err)
+		}
+		if note.CreatedAt.IsZero() || note.UpdatedAt.IsZero() {
+			return fmt.Errorf("timestamp catatan %d tidak boleh kosong", note.ID)
 		}
 	}
 
@@ -72,6 +83,10 @@ func SaveNotes(path string, collection NotesCollection) error {
 		return err
 	}
 	if err := os.WriteFile(path, data, 0o600); err != nil {
+		return err
+	}
+	// os.WriteFile does not change the mode of an existing file.
+	if err := os.Chmod(path, 0o600); err != nil {
 		return err
 	}
 	return nil
