@@ -30,6 +30,7 @@ func TestValidateNoteLines(t *testing.T) {
 		{},
 		{"   "},
 		{"one", ""},
+		{"embedded\nnewline"},
 		{"1", "2", "3", "4", "5", "6"},
 	}
 	for _, lines := range invalid {
