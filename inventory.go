@@ -36,6 +36,32 @@ func LoadAktivitas(path string) (ListMutabaah, error) {
 	if err := json.Unmarshal(data, &list); err != nil {
 		return list, err
 	}
+
+	// Normalize older records that may lack target metadata. encoding/json matches
+	// keys case-insensitively, so legacy "Sesi"/"Periode" fields remain readable.
+	for i := range list.DaftarAktivitas {
+		aktivitas := &list.DaftarAktivitas[i]
+		if aktivitas.Target.Sesi <= 0 {
+			aktivitas.Target.Sesi = defaultTargetSesi
+		}
+		if aktivitas.Target.Periode <= 0 {
+			aktivitas.Target.Periode = defaultTargetPeriode
+		}
+		if aktivitas.Progress < 0 {
+			aktivitas.Progress = 0
+		}
+		if aktivitas.Progress > aktivitas.Target.Sesi {
+			aktivitas.Progress = aktivitas.Target.Sesi
+		}
+		// Older versions stored completion without maintaining Progress.
+		if aktivitas.IsDone && aktivitas.Progress < aktivitas.Target.Sesi {
+			aktivitas.Progress = aktivitas.Target.Sesi
+		}
+		if aktivitas.Progress >= aktivitas.Target.Sesi {
+			aktivitas.Progress = aktivitas.Target.Sesi
+			aktivitas.IsDone = true
+		}
+	}
 	return list, nil
 
 }

@@ -5,10 +5,26 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func main() {
 	if len(os.Args) < 2 {
+		printHelp()
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+	if command == "help" || command == "--help" || command == "-h" {
+		printHelp()
+		return
+	}
+
+	switch command {
+	case "tambah", "list", "catat", "sudah", "hapus", "ubah":
+		// Known commands may access the data store.
+	default:
+		fmt.Printf("Perintah %q tidak dikenal. Berikut daftar perintah yang tersedia:\n\n", command)
 		printHelp()
 		os.Exit(1)
 	}
@@ -29,34 +45,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	command := os.Args[1]
 	changed := true
 
 	switch command {
 	case "tambah":
-		if len(os.Args) < 3 {
-			fmt.Println("Penggunaan: mutabaah-cli tambah \"Judul Aktivitas\"")
+		judul, target, err := parseTambahArgs(os.Args[2:])
+		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
-		judul := strings.Join(os.Args[2:], " ")
-		aktivitas := list.Tambah(judul)
-		fmt.Printf("Aktivitas %s dengan ID %d berhasil ditambahkan\n", aktivitas.Judul, aktivitas.Id)
+		aktivitas, err := list.TambahDenganTarget(judul, target)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Aktivitas %q dengan ID %d berhasil ditambahkan (target %d sesi dalam %d hari)\n",
+			aktivitas.Judul, aktivitas.Id, aktivitas.Target.Sesi, aktivitas.Target.Periode)
 
 	case "list":
 		changed = false
-		showAll := false
-		showDone := false
-
-		for _, arg := range os.Args[2:] {
-			switch arg {
-			case "--all", "-all":
-				showAll = true
-			case "--done", "-done":
-				showDone = true
-			default:
-				fmt.Printf("flag %q raib, coba: --all atau --done\n", arg)
-				os.Exit(1)
-			}
+		showAll, showDone, flagErr := parseListFlags(os.Args[2:])
+		if flagErr != nil {
+			fmt.Println(flagErr)
+			os.Exit(1)
 		}
 
 		if showAll && showDone {
@@ -82,15 +93,33 @@ func main() {
 			if a.IsDone {
 				status = "|Ntos|"
 			}
-			fmt.Printf("%s %d. %s\n", status, a.Id, a.Judul)
+			detail := fmt.Sprintf("[%d/%d sesi; target %d hari]", a.Progress, a.Target.Sesi, a.Target.Periode)
+			if a.Terlambat(time.Now()) {
+				detail += " [TERLAMBAT]"
+			}
+			fmt.Printf("%s %d. %s %s\n", status, a.Id, a.Judul, detail)
 			shown++
 		}
 		if shown == 0 {
 			if showDone {
-				fmt.Println("Belum ada aktivitas yang terlaksana. Tandai dengan: mutabaah-cli sudah <id>")
+				fmt.Println("Belum ada aktivitas yang selesai. Gunakan: mutabaah-cli sudah <id> atau catat sesi dengan mutabaah-cli catat <id>")
 			} else {
-				fmt.Println("Aiight bro that's it you completed your goals, lihat semua goal dengan: mutabaah-cli list --all")
+				fmt.Println("Semua aktivitas sudah selesai. Gunakan mutabaah-cli list --all untuk melihat semuanya.")
 			}
+		}
+
+	case "catat":
+		id := parseID(os.Args, "catat")
+		aktivitas, err := list.Catat(id)
+		if err != nil {
+			fmt.Println("Error:", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Sesi dicatat untuk aktivitas %d. Progress: %d/%d sesi\n", id, aktivitas.Progress, aktivitas.Target.Sesi)
+		if aktivitas.IsDone {
+			fmt.Println("Target sesi tercapai; aktivitas ditandai selesai.")
+		} else if aktivitas.Terlambat(time.Now()) {
+			fmt.Println("Catatan tersimpan, tetapi target periodenya sudah lewat.")
 		}
 
 	case "sudah":
@@ -125,15 +154,6 @@ func main() {
 
 		fmt.Printf("Aktivitas %d berhasil diubah menjadi \"%s\"\n", id, judulBaru)
 
-	case "help":
-		changed = false
-		printHelp()
-	default:
-		changed = false
-		fmt.Printf("Perintah %q tidak dikenal. Berikut daftar perintah yang tersedia:\n\n", command)
-		printHelp()
-		os.Exit(1)
-
 	}
 
 	if changed {
@@ -142,6 +162,74 @@ func main() {
 			os.Exit(1)
 		}
 	}
+}
+
+func parseTambahArgs(args []string) (string, UkurTarget, error) {
+	target := UkurTarget{Sesi: defaultTargetSesi, Periode: defaultTargetPeriode}
+	judulParts := make([]string, 0, len(args))
+
+	for i := 0; i < len(args); i++ {
+		arg := args[i]
+		switch {
+		case arg == "--sesi" || arg == "--periode":
+			if i+1 >= len(args) {
+				return "", UkurTarget{}, fmt.Errorf("Flag %s membutuhkan angka positif", arg)
+			}
+			value, err := parsePositiveInt(arg, args[i+1])
+			if err != nil {
+				return "", UkurTarget{}, err
+			}
+			if arg == "--sesi" {
+				target.Sesi = value
+			} else {
+				target.Periode = value
+			}
+			i++
+		case strings.HasPrefix(arg, "--sesi=") || strings.HasPrefix(arg, "--periode="):
+			flag, rawValue, _ := strings.Cut(arg, "=")
+			value, err := parsePositiveInt(flag, rawValue)
+			if err != nil {
+				return "", UkurTarget{}, err
+			}
+			if flag == "--sesi" {
+				target.Sesi = value
+			} else {
+				target.Periode = value
+			}
+		case strings.HasPrefix(arg, "-"):
+			return "", UkurTarget{}, fmt.Errorf("Flag %q tidak dikenal. Gunakan --sesi dan --periode", arg)
+		default:
+			judulParts = append(judulParts, arg)
+		}
+	}
+
+	judul := strings.TrimSpace(strings.Join(judulParts, " "))
+	if judul == "" {
+		return "", UkurTarget{}, fmt.Errorf("Penggunaan: mutabaah-cli tambah \"judul aktivitas\" [--sesi N] [--periode HARI]")
+	}
+	return judul, target, nil
+}
+
+func parsePositiveInt(flag, rawValue string) (int, error) {
+	value, err := strconv.Atoi(rawValue)
+	if err != nil || value <= 0 {
+		return 0, fmt.Errorf("Nilai %s harus berupa angka positif", flag)
+	}
+	return value, nil
+}
+
+func parseListFlags(args []string) (showAll, showDone bool, err error) {
+	for _, arg := range args {
+		switch arg {
+		case "--all", "-all":
+			showAll = true
+		case "--done", "-done":
+			showDone = true
+		default:
+			return false, false, fmt.Errorf("Flag %q tidak dikenal. Gunakan --all atau --done", arg)
+		}
+	}
+	return showAll, showDone, nil
 }
 
 func parseID(args []string, cmd string) int {
@@ -158,12 +246,24 @@ func parseID(args []string, cmd string) int {
 }
 
 func printHelp() {
-	fmt.Println(`mutabaah-cli tracker ibadah sederhana
-	Penggunaan:
-  mutabaah-cli tambah "judul aktivitas"    Tambah aktivitas baru
-  mutabaah-cli list                        Tampilkan semua aktivitas
-  mutabaah-cli sudah <id>                  Tandai aktivitas selesai
-  mutabaah-cli hapus <id>                  Hapus aktivitas
-  mutabaah-cli ubah <id> "judul baru"      Ubah judul aktivitas
-	`)
+	fmt.Println(`mutabaah-cli — tracker ibadah dan aktivitas berbasis CLI
+
+Penggunaan:
+  mutabaah-cli tambah "judul aktivitas" [--sesi N] [--periode HARI]
+  mutabaah-cli list [--all | --done]
+  mutabaah-cli catat <id>                 Catat satu sesi aktivitas
+  mutabaah-cli sudah <id>                 Tandai target aktivitas selesai manual
+  mutabaah-cli ubah <id> "judul baru"     Ubah judul aktivitas
+  mutabaah-cli hapus <id>                 Hapus aktivitas
+  mutabaah-cli help                       Tampilkan bantuan
+
+Perintah list:
+  (tanpa flag)   Tampilkan aktivitas yang belum selesai
+  --done         Tampilkan aktivitas yang sudah selesai
+  --all          Tampilkan semua aktivitas
+
+Target default aktivitas baru: 3 sesi dalam 7 hari.
+Periode dihitung sejak aktivitas dibuat; aktivitas yang melewati target waktu
+akan ditandai TERLAMBAT selama belum selesai. Gunakan --sesi dan --periode
+untuk mengatur target masing-masing aktivitas.`)
 }
