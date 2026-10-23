@@ -64,19 +64,10 @@ func main() {
 
 	case "list":
 		changed = false
-		showAll := false
-		showDone := false
-
-		for _, arg := range os.Args[2:] {
-			switch arg {
-			case "--all", "-all":
-				showAll = true
-			case "--done", "-done":
-				showDone = true
-			default:
-				fmt.Printf("flag %q raib, coba: --all atau --done\n", arg)
-				os.Exit(1)
-			}
+		showAll, showDone, flagErr := parseListFlags(os.Args[2:])
+		if flagErr != nil {
+			fmt.Println(flagErr)
+			os.Exit(1)
 		}
 
 		if showAll && showDone {
@@ -225,6 +216,20 @@ func parsePositiveInt(flag, rawValue string) (int, error) {
 		return 0, fmt.Errorf("Nilai %s harus berupa angka positif", flag)
 	}
 	return value, nil
+}
+
+func parseListFlags(args []string) (showAll, showDone bool, err error) {
+	for _, arg := range args {
+		switch arg {
+		case "--all", "-all":
+			showAll = true
+		case "--done", "-done":
+			showDone = true
+		default:
+			return false, false, fmt.Errorf("Flag %q tidak dikenal. Gunakan --all atau --done", arg)
+		}
+	}
+	return showAll, showDone, nil
 }
 
 func parseID(args []string, cmd string) int {
